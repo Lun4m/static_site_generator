@@ -13,7 +13,6 @@ class TextType(Enum):
 
 
 class TextNode:
-    # TODO: support multilevel nesting of TextType
     def __init__(self, text, text_type=None, url=None) -> None:
         self.text = text
         self.text_type = text_type
@@ -53,4 +52,25 @@ def text_node_to_html_node(text_node):
 
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
-    pass
+    # TODO: support multilevel nesting of TextType
+    new_nodes = []
+    for node in old_nodes:
+        if node.text_type != TextType.Text:
+            # warn: we only split Text
+            new_nodes.append(node)
+            continue
+
+        sections = node.text.split(delimiter)
+        if len(sections) % 2 == 0:
+            raise Exception("Missing a closing delimiter")
+
+        for i, text in enumerate(sections):
+            if text == "":
+                continue
+
+            if i % 2 == 0:
+                new = TextNode(text, TextType.Text)
+            else:
+                new = TextNode(text, text_type)
+            new_nodes.append(new)
+    return new_nodes
