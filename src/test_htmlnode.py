@@ -23,6 +23,13 @@ class TestLeafNode(unittest.TestCase):
         for node, exp in zip(nodes, expected):
             self.assertEqual(node.to_html(), exp)
 
+    def test_leaf_image(self):
+        node = LeafNode(
+            tag="img", value="", props={"alt": "sample image", "src": "dir/some.png"}
+        )
+        expected = '<img alt="sample image" src="dir/some.png"></img>'
+        self.assertEqual(node.to_html(), expected)
+
 
 class TestParentNode(unittest.TestCase):
     def test_single_parent(self):

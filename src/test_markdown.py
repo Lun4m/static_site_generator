@@ -33,7 +33,7 @@ class ConversionTests(unittest.TestCase):
             LeafNode(tag="i", value="Italic"),
             LeafNode(tag="code", value="Code"),
             LeafNode(tag="a", value="Link", props={"href": "https://website.com"}),
-            LeafNode(tag="img", props={"src": "image.png", "alt": "Image"}),
+            LeafNode(tag="img", value="", props={"src": "image.png", "alt": "Image"}),
         ]
         for node, exp in zip(text_nodes, expected):
             self.assertEqual(text_node_to_html_node(node), exp)
