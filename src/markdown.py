@@ -21,7 +21,7 @@ def extract_markdown_images(text):
 
 
 def extract_markdown_links(text):
-    # [text](url)
+    # [alt](url)
     return re.findall(r"\[(.*?)\]\((.*?)\)", text)
 
 
@@ -152,7 +152,6 @@ def markdown_to_blocks(markdown: str):
 
 
 def block_to_block_type(block):
-    # TODO: might be better
     lines = block.split("\n")
     allowed_headings = ["# ", "## ", "### ", "#### ", "##### ", "###### "]
 
@@ -182,7 +181,7 @@ def heading_block_to_html(block):
         "###### ": "h6",
     }
     for h in headings:
-        if h in block:
+        if block[: len(h)] == h:
             block = block.removeprefix(h)
             nodes = text_to_textnodes(block)
             children = [text_node_to_html_node(node) for node in nodes]
