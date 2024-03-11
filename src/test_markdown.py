@@ -1,12 +1,13 @@
 import unittest
 
-from htmlnode import LeafNode
+from htmlnode import LeafNode, ParentNode
 from markdown import (
     Block,
     block_to_block_type,
     extract_markdown_images,
     extract_markdown_links,
     markdown_to_blocks,
+    markdown_to_html_node,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -180,6 +181,108 @@ This is the same paragraph on a new line
         ]
         for block, exp in zip(blocks, expected):
             self.assertEqual(block_to_block_type(block), exp)
+
+
+class MarkdownToHTMLTests(unittest.TestCase):
+    def test_simple_conversion(self):
+        text = """# This is a **bolded** heading
+
+This is a paragraph with *italic* text and `code` here
+This is the same paragraph on a new line
+
+```
+cd directory
+python some_scripts.py
+```
+
+* This is a list
+* with items
+
+1. My item
+2. Your item
+
+> Tu quoque,
+> Brute,
+> fili mi!
+"""
+        expected = ParentNode(
+            tag="div",
+            children=[
+                ParentNode(
+                    tag="h1",
+                    children=[
+                        LeafNode(value="This is a "),
+                        LeafNode(tag="b", value="bolded"),
+                        LeafNode(value=" heading"),
+                    ],
+                ),
+                ParentNode(
+                    tag="p",
+                    children=[
+                        LeafNode(value="This is a paragraph with "),
+                        LeafNode(tag="i", value="italic"),
+                        LeafNode(value=" text and "),
+                        LeafNode(tag="code", value="code"),
+                        LeafNode(
+                            value=" here\nThis is the same paragraph on a new line"
+                        ),
+                    ],
+                ),
+                ParentNode(
+                    tag="pre",
+                    children=[
+                        ParentNode(
+                            tag="code",
+                            children=[
+                                LeafNode(value="cd directory\npython some_scripts.py"),
+                            ],
+                        )
+                    ],
+                ),
+                ParentNode(
+                    tag="ul",
+                    children=[
+                        ParentNode(
+                            tag="li",
+                            children=[
+                                LeafNode(value="This is a list"),
+                            ],
+                        ),
+                        ParentNode(
+                            tag="li",
+                            children=[
+                                LeafNode(value="with items"),
+                            ],
+                        ),
+                    ],
+                ),
+                ParentNode(
+                    tag="ol",
+                    children=[
+                        ParentNode(
+                            tag="li",
+                            children=[
+                                LeafNode(value="My item"),
+                            ],
+                        ),
+                        ParentNode(
+                            tag="li",
+                            children=[
+                                LeafNode(value="Your item"),
+                            ],
+                        ),
+                    ],
+                ),
+                ParentNode(
+                    tag="blockquote",
+                    children=[
+                        LeafNode(value="Tu quoque,\nBrute,\nfili mi!"),
+                    ],
+                ),
+            ],
+        )
+        result = markdown_to_html_node(text)
+        self.assertEqual(result, expected)
 
 
 if __name__ == "__main__":
