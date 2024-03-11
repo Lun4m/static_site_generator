@@ -1,7 +1,17 @@
+import enum
 import re
 
 from htmlnode import LeafNode
 from textnode import TextNode, TextType
+
+
+class Block(enum.Enum):
+    Paragraph = 0
+    Heading = 1
+    Code = 2
+    Quote = 3
+    UnorderedList = 4
+    OrderedList = 5
 
 
 def extract_markdown_images(text):
@@ -103,6 +113,38 @@ def text_to_textnodes(text):
     nodes = split_nodes_image(nodes)
     nodes = split_nodes_link(nodes)
     return nodes
+
+
+def markdown_to_blocks(markdown: str):
+    # NOTE: we assume blocks are separated by blank lines!
+    lines = markdown.split("\n\n")
+
+    blocks = []
+    for line in lines:
+        if line == "":
+            continue
+        blocks.append(line.strip())
+    return blocks
+
+
+def block_to_block_type(block):
+    # TODO: might be better
+    lines = block.split("\n")
+    allowed_headings = ["# ", "## ", "### ", "#### ", "##### ", "###### "]
+
+    if any([lines[0].startswith(h) for h in allowed_headings]):
+        return Block.Heading
+    if len(lines) > 1 and lines[0] == "```" and lines[-1] == "```":
+        return Block.Code
+    if all([line.startswith(">") for line in lines]):
+        return Block.Quote
+    if all([line.startswith("* ") for line in lines]):
+        return Block.UnorderedList
+    if all([line.startswith("- ") for line in lines]):
+        return Block.UnorderedList
+    if all([line.startswith(f"{i+1}. ") for i, line in enumerate(lines)]):
+        return Block.OrderedList
+    return Block.Paragraph
 
 
 def text_node_to_html_node(text_node):

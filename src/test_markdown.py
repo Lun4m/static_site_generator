@@ -2,8 +2,11 @@ import unittest
 
 from htmlnode import LeafNode
 from markdown import (
+    Block,
+    block_to_block_type,
     extract_markdown_images,
     extract_markdown_links,
+    markdown_to_blocks,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -136,6 +139,47 @@ class TextToTextNodeTests(unittest.TestCase):
             TextNode("link", TextType.Link, "https://boot.dev"),
         ]
         self.assertEqual(nodes, expected)
+
+
+class MarkdownBlocksTests(unittest.TestCase):
+    def test_md_to_block(self):
+        text = """This is **bolded** paragraph
+
+This is another paragraph with *italic* text and `code` here
+This is the same paragraph on a new line
+
+* This is a list
+* with items
+"""
+        blocks = markdown_to_blocks(text)
+        expected = [
+            "This is **bolded** paragraph",
+            "This is another paragraph with *italic* text and `code` here\nThis is the same paragraph on a new line",
+            "* This is a list\n* with items",
+        ]
+        self.assertEqual(blocks, expected)
+
+    def test_block_type_parsing(self):
+        blocks = [
+            "#### This is a header",
+            "This is **bolded** paragraph",
+            "```\npython some_script.py\n```",
+            "This is another paragraph with *italic* text and `code` here\nThis is the same paragraph on a new line",
+            "> Quotes\n> And more quotes\n> And more quotes",
+            "* This is a list\n* with items",
+            "1. item\n2. item\n3. item",
+        ]
+        expected = [
+            Block.Heading,
+            Block.Paragraph,
+            Block.Code,
+            Block.Paragraph,
+            Block.Quote,
+            Block.UnorderedList,
+            Block.OrderedList,
+        ]
+        for block, exp in zip(blocks, expected):
+            self.assertEqual(block_to_block_type(block), exp)
 
 
 if __name__ == "__main__":
