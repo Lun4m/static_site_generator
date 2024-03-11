@@ -8,6 +8,7 @@ from markdown import (
     split_nodes_image,
     split_nodes_link,
     text_node_to_html_node,
+    text_to_textnodes,
 )
 from textnode import TextNode, TextType
 
@@ -116,6 +117,25 @@ class ImageAndLinkSplittingTests(unittest.TestCase):
             TextNode("second link", TextType.Link, "https://www.google.com"),
         ]
         self.assertEqual(new_nodes, expected)
+
+
+class TextToTextNodeTests(unittest.TestCase):
+    def test_parsing(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![image](https://i.imgur.com/zjjcJKZ.png) and a [link](https://boot.dev)"
+        nodes = text_to_textnodes(text)
+        expected = [
+            TextNode("This is ", TextType.Text),
+            TextNode("text", TextType.Bold),
+            TextNode(" with an ", TextType.Text),
+            TextNode("italic", TextType.Italic),
+            TextNode(" word and a ", TextType.Text),
+            TextNode("code block", TextType.Code),
+            TextNode(" and an ", TextType.Text),
+            TextNode("image", TextType.Image, "https://i.imgur.com/zjjcJKZ.png"),
+            TextNode(" and a ", TextType.Text),
+            TextNode("link", TextType.Link, "https://boot.dev"),
+        ]
+        self.assertEqual(nodes, expected)
 
 
 if __name__ == "__main__":

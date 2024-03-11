@@ -33,6 +33,9 @@ def split_nodes_image(old_nodes):
             if start != "":
                 new_nodes.append(TextNode(start, TextType.Text))
             new_nodes.append(TextNode(alt, TextType.Image, url))
+
+        if text != "":
+            new_nodes.append(TextNode(text, TextType.Text))
     return new_nodes
 
 
@@ -55,6 +58,9 @@ def split_nodes_link(old_nodes):
             if start != "":
                 new_nodes.append(TextNode(start, TextType.Text))
             new_nodes.append(TextNode(alt, TextType.Link, url))
+
+        if text != "":
+            new_nodes.append(TextNode(text, TextType.Text))
     return new_nodes
 
 
@@ -81,6 +87,22 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                 new = TextNode(text, text_type)
             new_nodes.append(new)
     return new_nodes
+
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, TextType.Text)]
+    delimiters = {
+        TextType.Bold: "**",
+        TextType.Italic: "*",
+        TextType.Code: "`",
+    }
+
+    for t, d in delimiters.items():
+        nodes = split_nodes_delimiter(nodes, d, t)
+
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes
 
 
 def text_node_to_html_node(text_node):
