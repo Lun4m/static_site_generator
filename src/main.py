@@ -1,6 +1,5 @@
 import os
 import shutil
-import sys
 
 from markdown import markdown_to_html_node
 
@@ -56,9 +55,25 @@ def generate_page(from_path, template_path, dest_path):
     write_file(html, dest_path)
 
 
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    if not os.path.exists(dest_dir_path):
+        os.mkdir(dest_dir_path)
+
+    for dir in os.listdir(dir_path_content):
+        path = os.path.join(dir_path_content, dir)
+        if os.path.isfile(path):
+            name, ext = os.path.splitext(dir)
+            if ext == ".md":
+                dest = os.path.join(dest_dir_path, f"{name}.html")
+                generate_page(path, template_path, dest)
+        else:
+            dest = os.path.join(dest_dir_path, dir)
+            generate_pages_recursive(path, template_path, dest)
+
+
 def main():
     copy_to_dir("static", "public")
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
 
 
 if __name__ == "__main__":
